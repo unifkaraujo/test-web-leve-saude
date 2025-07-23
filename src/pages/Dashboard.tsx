@@ -1,9 +1,9 @@
-import { signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { salvarFeedback } from "../lib/salvarFeedback";
-import FeedbackList from "../components/FeedbackList";
+import { signOut } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { salvarFeedback } from '../lib/salvarFeedback';
+import FeedbackList from '../components/FeedbackList';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -11,12 +11,11 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate("/");
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-[#242424] text-white p-4">
-
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-bold">Dashboard</h1>
         <button
@@ -28,16 +27,16 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <p>Bem-vindo(a), <strong>{user?.email}</strong>!</p>
+        <p>
+          Bem-vindo(a), <strong>{user?.email}</strong>!
+        </p>
 
         <FeedbackList />
-
       </div>
 
-      <button onClick={()=>salvarFeedback(5, 'comentário de teste',user?.uid)}>
+      <button onClick={() => salvarFeedback(5, 'comentário de teste', user?.uid)}>
         Salvar feedback de teste
       </button>
-
     </div>
   );
 }

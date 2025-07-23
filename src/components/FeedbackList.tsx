@@ -1,13 +1,6 @@
-import { useEffect, useState } from "react";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  where,
-  QueryConstraint,
-} from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { useEffect, useState } from 'react';
+import { collection, query, orderBy, onSnapshot, where, QueryConstraint } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 interface Feedback {
   id: string;
@@ -19,31 +12,29 @@ interface Feedback {
 
 export default function FeedbackList() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState('');
   const [filtroNota, setFiltroNota] = useState<number | null>(null);
-  const [filtroOrdenacao, setFiltroOrdenacao] = useState<"desc" | "asc">("desc");
+  const [filtroOrdenacao, setFiltroOrdenacao] = useState<'desc' | 'asc'>('desc');
 
   useEffect(() => {
     const constraints: QueryConstraint[] = [];
 
     if (filtroNota !== null) {
-      constraints.push(where("nota", "==", filtroNota));
+      constraints.push(where('nota', '==', filtroNota));
     }
 
-    constraints.push(orderBy("criadoEm", filtroOrdenacao));
+    constraints.push(orderBy('criadoEm', filtroOrdenacao));
 
-    const q = query(collection(db, "feedbacks"), ...constraints);
+    const q = query(collection(db, 'feedbacks'), ...constraints);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let docs = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as Omit<Feedback, "id">),
+        ...(doc.data() as Omit<Feedback, 'id'>),
       }));
 
-      if (busca.trim() !== "") {
-        docs = docs.filter((f) =>
-          f.comentario.toLowerCase().includes(busca.toLowerCase())
-        );
+      if (busca.trim() !== '') {
+        docs = docs.filter((f) => f.comentario.toLowerCase().includes(busca.toLowerCase()));
       }
 
       setFeedbacks(docs);
@@ -67,15 +58,13 @@ export default function FeedbackList() {
 
         <select
           className="p-2 rounded border"
-          value={filtroNota ?? ""}
-          onChange={(e) =>
-            setFiltroNota(e.target.value === "" ? null : Number(e.target.value))
-          }
+          value={filtroNota ?? ''}
+          onChange={(e) => setFiltroNota(e.target.value === '' ? null : Number(e.target.value))}
         >
           <option value="">Todas as notas</option>
           {[1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>
-              {n} estrela{n > 1 ? "s" : ""}
+              {n} estrela{n > 1 ? 's' : ''}
             </option>
           ))}
         </select>
@@ -83,9 +72,7 @@ export default function FeedbackList() {
         <select
           className="p-2 rounded border"
           value={filtroOrdenacao}
-          onChange={(e) =>
-            setFiltroOrdenacao(e.target.value === "asc" ? "asc" : "desc")
-          }
+          onChange={(e) => setFiltroOrdenacao(e.target.value === 'asc' ? 'asc' : 'desc')}
         >
           <option value="desc">Mais recentes</option>
           <option value="asc">Mais antigos</option>
@@ -98,23 +85,19 @@ export default function FeedbackList() {
         ) : (
           feedbacks.map(({ id, nota, comentario, criadoEm, usuarioId }) => (
             <div
-                key={id}
-                className="p-4 rounded shadow bg-gray-800 text-white border border-gray-700"
+              key={id}
+              className="p-4 rounded shadow bg-gray-800 text-white border border-gray-700"
             >
-                <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold mr-2">
-                    {Array(nota).fill("⭐").join("")}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold mr-2">{Array(nota).fill('⭐').join('')}</span>
                 <span className="text-gray-400 text-sm">
-                    {new Date(criadoEm.seconds * 1000).toLocaleString()}
+                  {new Date(criadoEm.seconds * 1000).toLocaleString()}
                 </span>
-                </div>
-                <p className="mb-1">{comentario}</p>
-                {usuarioId && (
-                <p className="text-xs text-gray-400">Enviado por: {usuarioId}</p>
-                )}
+              </div>
+              <p className="mb-1">{comentario}</p>
+              {usuarioId && <p className="text-xs text-gray-400">Enviado por: {usuarioId}</p>}
             </div>
-            ))
+          ))
         )}
       </div>
     </div>
