@@ -45,7 +45,7 @@ export default function FeedbackList() {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-white">Feedbacks</h2>
+      <h2 className="text-2xl font-bold mb-4">Feedbacks</h2>
 
       <div className="flex flex-wrap gap-4 mb-6">
         <input
