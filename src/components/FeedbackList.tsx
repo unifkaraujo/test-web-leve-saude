@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, where, QueryConstraint } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  where,
+  getDoc,
+  doc,
+  QueryConstraint,
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface Feedback {
@@ -8,6 +17,7 @@ interface Feedback {
   nota: number;
   comentario: string;
   criadoEm: { seconds: number; nanoseconds: number };
+  nomeUsuario?: string;
 }
 
 export default function FeedbackList() {
@@ -27,17 +37,29 @@ export default function FeedbackList() {
 
     const q = query(collection(db, 'feedbacks'), ...constraints);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      let docs = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const rawDocs = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as Omit<Feedback, 'id'>),
+        ...(doc.data() as Omit<Feedback, 'id' | 'nomeUsuario'>),
       }));
 
-      if (busca.trim() !== '') {
-        docs = docs.filter((f) => f.comentario.toLowerCase().includes(busca.toLowerCase()));
-      }
+      const filtrados = busca.trim()
+        ? rawDocs.filter((f) => f.comentario.toLowerCase().includes(busca.toLowerCase()))
+        : rawDocs;
 
-      setFeedbacks(docs);
+      const feedbacksComNome = await Promise.all(
+        filtrados.map(async (feedback) => {
+          try {
+            const userDoc = await getDoc(doc(db, 'users', feedback.usuarioId));
+            const nomeUsuario = userDoc.exists() ? userDoc.data().nome : 'Usuário desconhecido';
+            return { ...feedback, nomeUsuario };
+          } catch {
+            return { ...feedback, nomeUsuario: 'Erro ao buscar nome' };
+          }
+        })
+      );
+
+      setFeedbacks(feedbacksComNome);
     });
 
     return () => unsubscribe();
@@ -83,7 +105,7 @@ export default function FeedbackList() {
         {feedbacks.length === 0 ? (
           <p className="text-white">Nenhum feedback encontrado.</p>
         ) : (
-          feedbacks.map(({ id, nota, comentario, criadoEm, usuarioId }) => (
+          feedbacks.map(({ id, nota, comentario, criadoEm, nomeUsuario }) => (
             <div
               key={id}
               className="p-4 rounded shadow bg-gray-800 text-white border border-gray-700"
@@ -95,7 +117,7 @@ export default function FeedbackList() {
                 </span>
               </div>
               <p className="mb-1">{comentario}</p>
-              {usuarioId && <p className="text-xs text-gray-400">Enviado por: {usuarioId}</p>}
+              <p className="text-xs text-gray-400">Enviado por: {nomeUsuario}</p>
             </div>
           ))
         )}

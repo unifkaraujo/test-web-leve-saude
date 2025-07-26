@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
 import { MdEmail, MdLock } from 'react-icons/md';
-import { FaSignInAlt } from 'react-icons/fa';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { FaSignInAlt, FaUser } from 'react-icons/fa';
+import { createUserWithEmailAndPassword, updateProfile  } from 'firebase/auth';
+import { auth, db } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button/Button';
 import { ButtonLink } from '../components/Button/ButtonLink';
 import { Spinner } from '../components/Spinner';
+import { doc, setDoc } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, senha);
+      const cred = await createUserWithEmailAndPassword(auth, email, senha);
+      await updateProfile(cred.user, { displayName: nome });
+
+      await refreshUser?.();
+
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        nome,
+        email,
+        criadoEm: new Date(),
+      });
+
       navigate('/dashboard');
     } catch {
       setErro('Erro ao criar conta');
@@ -37,6 +51,19 @@ export default function Register() {
         <h1 className="text-2xl font-bold mb-6 text-center">Cadastro</h1>
 
         <div className="flex flex-col gap-4">
+
+          <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
+            <FaUser className="text-gray-400" />
+            <input
+                type="text"
+                placeholder="Nome"
+                className="flex-1 outline-none"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+              />
+          </div>
+
           <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
             <MdEmail className="text-gray-400" />
             <input
