@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MdEmail, MdLock } from 'react-icons/md';
 import { FaSignInAlt, FaUser } from 'react-icons/fa';
-import { createUserWithEmailAndPassword, updateProfile  } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button/Button';
@@ -25,7 +25,7 @@ export default function Register() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, senha);
       await updateProfile(cred.user, { displayName: nome });
-      
+
       await setDoc(doc(db, 'users', cred.user.uid), {
         nome,
         email,
@@ -54,17 +54,16 @@ export default function Register() {
         <h1 className="text-2xl font-bold mb-6 text-center">Cadastro</h1>
 
         <div className="flex flex-col gap-4">
-
           <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
             <FaUser className="text-gray-400" />
             <input
-                type="text"
-                placeholder="Nome"
-                className="flex-1 outline-none"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-              />
+              type="text"
+              placeholder="Nome"
+              className="flex-1 outline-none"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+            />
           </div>
 
           <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
@@ -91,18 +90,16 @@ export default function Register() {
             />
           </div>
 
-          {erro && (
-            <p className="text-red-600 text-sm text-center font-medium">
-              {erro}
-            </p>
-          )}
+          {erro && <p className="text-red-600 text-sm text-center font-medium">{erro}</p>}
 
-           <Button disabled={loading}>
-              <div className={`flex items-center justify-center gap-2 transition-opacity ${loading && 'opacity-50 pointer-events-none'}`} >
-                Cadastrar
-                {loading && <Spinner colorClass="text-white" />}
-              </div>
-            </Button>
+          <Button disabled={loading}>
+            <div
+              className={`flex items-center justify-center gap-2 transition-opacity ${loading && 'opacity-50 pointer-events-none'}`}
+            >
+              Cadastrar
+              {loading && <Spinner colorClass="text-white" />}
+            </div>
+          </Button>
 
           <ButtonLink onClick={() => navigate('/')}>
             <FaSignInAlt className="inline mr-2" /> Já tenho conta

@@ -37,7 +37,9 @@ export default function Login() {
       >
         <h1 className="text-2xl font-bold mb-6 text-center">Entrar</h1>
         <div className="flex flex-col gap-4">
-          <div className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erro && 'border border-red-600'}`}>
+          <div
+            className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erro && 'border border-red-600'}`}
+          >
             <MdEmail className="text-gray-400" />
             <input
               type="email"
@@ -49,30 +51,30 @@ export default function Login() {
             />
           </div>
 
-          <div className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erro && 'border border-red-600'}`}>
+          <div
+            className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erro && 'border border-red-600'}`}
+          >
             <MdLock className="text-gray-400" />
             <input
               type="password"
               placeholder="Senha"
-              className='flex-1 outline-none'
+              className="flex-1 outline-none"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
             />
           </div>
 
-          {erro && (
-            <p className="text-red-600 text-sm text-center font-medium">
-              {erro}
-            </p>
-          )}
+          {erro && <p className="text-red-600 text-sm text-center font-medium">{erro}</p>}
 
-         <Button disabled={loading}>
-          <div className={`flex items-center justify-center gap-2 transition-opacity ${loading && 'opacity-50 pointer-events-none'}`} >
-            Entrar
-            {loading && <Spinner colorClass="text-white" />}
-          </div>
-        </Button>
+          <Button disabled={loading}>
+            <div
+              className={`flex items-center justify-center gap-2 transition-opacity ${loading && 'opacity-50 pointer-events-none'}`}
+            >
+              Entrar
+              {loading && <Spinner colorClass="text-white" />}
+            </div>
+          </Button>
 
           <ButtonLink onClick={() => navigate('/register')}>
             <FaUserPlus className="inline mr-2" /> Criar nova conta

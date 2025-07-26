@@ -30,9 +30,7 @@ export default function FeedbackList() {
     setLoading(true);
 
     const campoOrdenacao = filtroOrdenacao === 'data' ? 'criadoEm' : 'nota';
-    const constraints: QueryConstraint[] = [
-      orderBy(campoOrdenacao, 'desc')
-    ];
+    const constraints: QueryConstraint[] = [orderBy(campoOrdenacao, 'desc')];
 
     const q = query(collection(db, 'feedbacks'), ...constraints);
 
@@ -51,15 +49,13 @@ export default function FeedbackList() {
           } catch {
             return { ...feedback, nomeUsuario: 'Erro ao buscar nome' };
           }
-        })
+        }),
       );
 
       const filtrados =
         busca.trim() !== ''
           ? feedbacksComNome.filter((f) =>
-              `${f.nomeUsuario ?? ''} ${f.comentario}`
-                .toLowerCase()
-                .includes(busca.toLowerCase())
+              `${f.nomeUsuario ?? ''} ${f.comentario}`.toLowerCase().includes(busca.toLowerCase()),
             )
           : feedbacksComNome;
 
@@ -69,7 +65,6 @@ export default function FeedbackList() {
 
     return () => unsubscribe();
   }, [busca, filtroOrdenacao]);
-
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -87,15 +82,12 @@ export default function FeedbackList() {
         <select
           className="p-2 rounded border"
           value={filtroOrdenacao}
-          onChange={(e) =>
-            setFiltroOrdenacao(e.target.value === 'nota' ? 'nota' : 'data')
-          }
+          onChange={(e) => setFiltroOrdenacao(e.target.value === 'nota' ? 'nota' : 'data')}
         >
           <option value="data">Mais recentes</option>
           <option value="nota">Maior nota</option>
         </select>
       </div>
-
 
       <div className="space-y-4">
         {loading ? (
@@ -122,7 +114,6 @@ export default function FeedbackList() {
           ))
         )}
       </div>
-
     </div>
   );
 }

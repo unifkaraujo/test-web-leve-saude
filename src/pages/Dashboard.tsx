@@ -11,7 +11,7 @@ export default function Dashboard() {
       <Layout title="Dashboard">
         <Spinner colorClass="text-black" />
       </Layout>
-    )
+    );
   }
 
   return (
@@ -21,7 +21,6 @@ export default function Dashboard() {
       </p>
 
       <FeedbackList />
-
     </Layout>
   );
 }
