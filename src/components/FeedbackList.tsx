@@ -4,7 +4,6 @@ import {
   query,
   orderBy,
   onSnapshot,
-  where,
   getDoc,
   doc,
   QueryConstraint,
@@ -23,17 +22,13 @@ interface Feedback {
 export default function FeedbackList() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [busca, setBusca] = useState('');
-  const [filtroNota, setFiltroNota] = useState<number | null>(null);
-  const [filtroOrdenacao, setFiltroOrdenacao] = useState<'desc' | 'asc'>('desc');
+  const [filtroOrdenacao, setFiltroOrdenacao] = useState<'data' | 'nota'>('data');
 
   useEffect(() => {
-    const constraints: QueryConstraint[] = [];
-
-    if (filtroNota !== null) {
-      constraints.push(where('nota', '==', filtroNota));
-    }
-
-    constraints.push(orderBy('criadoEm', filtroOrdenacao));
+    const campoOrdenacao = filtroOrdenacao === 'data' ? 'criadoEm' : 'nota';
+    const constraints: QueryConstraint[] = [
+      orderBy(campoOrdenacao, 'desc')
+    ];
 
     const q = query(collection(db, 'feedbacks'), ...constraints);
 
@@ -43,12 +38,8 @@ export default function FeedbackList() {
         ...(doc.data() as Omit<Feedback, 'id' | 'nomeUsuario'>),
       }));
 
-      const filtrados = busca.trim()
-        ? rawDocs.filter((f) => f.comentario.toLowerCase().includes(busca.toLowerCase()))
-        : rawDocs;
-
       const feedbacksComNome = await Promise.all(
-        filtrados.map(async (feedback) => {
+        rawDocs.map(async (feedback) => {
           try {
             const userDoc = await getDoc(doc(db, 'users', feedback.usuarioId));
             const nomeUsuario = userDoc.exists() ? userDoc.data().nome : 'Usuário desconhecido';
@@ -59,11 +50,20 @@ export default function FeedbackList() {
         })
       );
 
-      setFeedbacks(feedbacksComNome);
+      const filtrados =
+        busca.trim() !== ''
+          ? feedbacksComNome.filter((f) =>
+              `${f.nomeUsuario ?? ''} ${f.comentario}`
+                .toLowerCase()
+                .includes(busca.toLowerCase())
+            )
+          : feedbacksComNome;
+
+      setFeedbacks(filtrados);
     });
 
     return () => unsubscribe();
-  }, [busca, filtroNota, filtroOrdenacao]);
+  }, [busca, filtroOrdenacao]);
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -72,38 +72,28 @@ export default function FeedbackList() {
       <div className="flex flex-wrap gap-4 mb-6">
         <input
           type="text"
-          placeholder="Buscar comentário"
-          className="p-2 rounded border w-full sm:w-64"
+          placeholder="Buscar comentário ou nome"
+          className="p-2 rounded border w-full sm:w-78"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
 
         <select
           className="p-2 rounded border"
-          value={filtroNota ?? ''}
-          onChange={(e) => setFiltroNota(e.target.value === '' ? null : Number(e.target.value))}
-        >
-          <option value="">Todas as notas</option>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <option key={n} value={n}>
-              {n} estrela{n > 1 ? 's' : ''}
-            </option>
-          ))}
-        </select>
-
-        <select
-          className="p-2 rounded border"
           value={filtroOrdenacao}
-          onChange={(e) => setFiltroOrdenacao(e.target.value === 'asc' ? 'asc' : 'desc')}
+          onChange={(e) =>
+            setFiltroOrdenacao(e.target.value === 'nota' ? 'nota' : 'data')
+          }
         >
-          <option value="desc">Mais recentes</option>
-          <option value="asc">Mais antigos</option>
+          <option value="data">Mais recentes</option>
+          <option value="nota">Maior nota</option>
         </select>
       </div>
 
+
       <div className="space-y-4">
         {feedbacks.length === 0 ? (
-          <p className="text-white">Nenhum feedback encontrado.</p>
+          <p className="">Nenhum feedback encontrado.</p>
         ) : (
           feedbacks.map(({ id, nota, comentario, criadoEm, nomeUsuario }) => (
             <div
