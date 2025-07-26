@@ -15,12 +15,16 @@ export default function Register() {
   const [senha, setSenha] = useState('');
   const [nome, setNome] = useState('');
   const [erro, setErro] = useState('');
+  const [erroEmail, setErroEmail] = useState(false);
+  const [erroSenha, setErroSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErroEmail(false)
+    setErroSenha(false)
     setLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, senha);
@@ -37,9 +41,31 @@ export default function Register() {
       }
 
       navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
-      setErro('Erro ao criar conta');
+    } catch (error: any) {
+      console.error('Erro no registro:', error);
+      let mensagem = 'Erro ao criar conta';
+
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          mensagem = 'E-mail já está em uso';
+          setErroEmail(true)
+          break;
+        case 'auth/invalid-email':
+          mensagem = 'E-mail inválido';
+          setErroEmail(true)
+          break;
+        case 'auth/weak-password':
+          mensagem = 'Senha muito fraca (mínimo 6 caracteres)';
+          setErroSenha(true)
+          break;
+        case 'auth/operation-not-allowed':
+          mensagem = 'Registro de usuários não está habilitado';
+          break;
+        default:
+          mensagem = 'Erro desconhecido: ' + error.code;
+      }
+
+      setErro(mensagem);
     } finally {
       setLoading(false);
     }
@@ -54,7 +80,7 @@ export default function Register() {
         <h1 className="text-2xl font-bold mb-6 text-center">Cadastro</h1>
 
         <div className="flex flex-col gap-4">
-          <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
+          <div className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2`}>
             <FaUser className="text-gray-400" />
             <input
               type="text"
@@ -66,7 +92,7 @@ export default function Register() {
             />
           </div>
 
-          <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
+          <div className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erroEmail && 'border border-red-600'}`}>
             <MdEmail className="text-gray-400" />
             <input
               type="email"
@@ -78,7 +104,7 @@ export default function Register() {
             />
           </div>
 
-          <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2">
+          <div className={`flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-600 p-3 gap-2 ${erroSenha && 'border border-red-600'}`}>
             <MdLock className="text-gray-400" />
             <input
               type="password"

@@ -22,8 +22,29 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, senha);
       navigate('/dashboard');
-    } catch {
-      setErro('Login inválido');
+    } catch (error: any) {
+      console.error('Erro no login:', error);
+
+      let mensagem = 'Erro ao fazer login';
+
+      switch (error.code) {
+        case 'auth/invalid-credential':
+          mensagem = 'E-mail ou senha inválidos';
+          break;
+        case 'auth/too-many-requests':
+          mensagem = 'Muitas tentativas. Tente novamente mais tarde.';
+          break;
+        case 'auth/user-disabled':
+          mensagem = 'Esta conta foi desativada.';
+          break;
+        case 'auth/invalid-email':
+          mensagem = 'Formato de e-mail inválido.';
+          break;
+        default:
+          mensagem = 'Erro desconhecido: ' + error.code;
+      }
+      
+      setErro(mensagem);
     } finally {
       setLoading(false);
     }
