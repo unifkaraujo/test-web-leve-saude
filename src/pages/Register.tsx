@@ -25,17 +25,20 @@ export default function Register() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, senha);
       await updateProfile(cred.user, { displayName: nome });
-
-      await refreshUser?.();
-
+      
       await setDoc(doc(db, 'users', cred.user.uid), {
         nome,
         email,
         criadoEm: new Date(),
       });
 
+      if (refreshUser) {
+        await refreshUser();
+      }
+
       navigate('/dashboard');
-    } catch {
+    } catch (error) {
+      console.error(error);
       setErro('Erro ao criar conta');
     } finally {
       setLoading(false);

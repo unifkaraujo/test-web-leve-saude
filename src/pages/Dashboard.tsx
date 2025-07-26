@@ -17,7 +17,7 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
       <p className="mb-4">
-        Bem-vindo(a), <strong>{user?.displayName}</strong>!
+        Bem-vindo(a) {user?.displayName && <strong>{user.displayName}</strong>} !
       </p>
 
       <FeedbackList />

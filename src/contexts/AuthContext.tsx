@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshUser = async () => {
     if (auth.currentUser) {
       await auth.currentUser.reload();
-      setUser(auth.currentUser);
+      setUser({ ...auth.currentUser });
     }
   };
 
