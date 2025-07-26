@@ -9,6 +9,7 @@ import {
   QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { Spinner } from './Spinner';
 
 interface Feedback {
   id: string;
@@ -23,8 +24,11 @@ export default function FeedbackList() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [busca, setBusca] = useState('');
   const [filtroOrdenacao, setFiltroOrdenacao] = useState<'data' | 'nota'>('data');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
+
     const campoOrdenacao = filtroOrdenacao === 'data' ? 'criadoEm' : 'nota';
     const constraints: QueryConstraint[] = [
       orderBy(campoOrdenacao, 'desc')
@@ -60,10 +64,12 @@ export default function FeedbackList() {
           : feedbacksComNome;
 
       setFeedbacks(filtrados);
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [busca, filtroOrdenacao]);
+
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -92,7 +98,11 @@ export default function FeedbackList() {
 
 
       <div className="space-y-4">
-        {feedbacks.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <Spinner colorClass="text-black" />
+          </div>
+        ) : feedbacks.length === 0 ? (
           <p className="">Nenhum feedback encontrado.</p>
         ) : (
           feedbacks.map(({ id, nota, comentario, criadoEm, nomeUsuario }) => (
@@ -112,6 +122,7 @@ export default function FeedbackList() {
           ))
         )}
       </div>
+
     </div>
   );
 }
